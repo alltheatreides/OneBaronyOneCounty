@@ -6,12 +6,12 @@ BARONY_ATTR_TO_NOT_COPY = ["definite_form", "province"]
 def one_barony_one_county(
     input_landed_tile_file_path: str, output_landed_tile_file_path: str
 ):
-    with open(input_landed_tile_file_path, "r", encoding="utf8") as f:
+    with open("C:/Program Files (x86)/Steam/steamapps/common/Crusader Kings III/game/common/landed_titles/00_landed_titles.txt", "r", encoding="utf8") as f:
         input_lines = f.readlines()
     input_lines = format_lines(input_lines)
     all_counties = list_all_counties(input_lines)
     edit_lines = parse_and_edit_lines(input_lines, all_counties)
-    with open(output_landed_tile_file_path, "w", encoding="utf8") as f:
+    with open("C:/Users/GAMERWORLD/Documents/Paradox Interactive/Crusader Kings III/mod/ave-maria-rebuild/common/landed_titles/00_landed_titles.txt", "w", encoding="utf8") as f:
         f.writelines(edit_lines)
 
 
@@ -49,7 +49,7 @@ def list_all_counties(lines: list) -> set:
             non_commented_line = line.split("#")[0]
         if re.search("[\t\W]+c_\w*[-'\w]*\W*=", non_commented_line) is not None:
             county_match = re.search("c_\w*[-'\w]*", line).regs[0]
-            res.add(line[county_match[0] : county_match[1]][2:])
+            res.add(line[county_match[0]: county_match[1]][2:])
     return res
 
 
@@ -107,13 +107,13 @@ def parse_county(input_lines: list, line_index: int, all_counties: set):
     i = line_index
     line = input_lines[i]
     county_match = re.search("c_\w*[-'\w]*", line).regs[0]
-    county_name = line[county_match[0] : county_match[1]][2:]
+    county_name = line[county_match[0]: county_match[1]][2:]
     tab_nb = line.count("\t")
     county_attributes = dict()
     baronies = []
     barony_with_county_name = False
     bracket_level = 0
-    line = line[line.find("{") + 1 :]
+    line = line[line.find("{") + 1:]
     while bracket_level >= 0:
         i += 1
         line = input_lines[i]
@@ -128,11 +128,13 @@ def parse_county(input_lines: list, line_index: int, all_counties: set):
                 # The equal is in fact in a comment,
                 continue
             if tokens[0].startswith("b_"):
-                barony_name, barony_attributes, i = parse_barony(input_lines, i)
+                barony_name, barony_attributes, i = parse_barony(
+                    input_lines, i)
                 barony_with_county_name = barony_with_county_name | (
                     barony_name == county_name
                 )
-                baronies.append({"name": barony_name, "attributes": barony_attributes})
+                baronies.append(
+                    {"name": barony_name, "attributes": barony_attributes})
             else:
                 value, i, bracket_level = extract_attribute_value(
                     tokens[1], input_lines, i, bracket_level
@@ -158,7 +160,7 @@ def parse_barony(input_lines: list, line_index: int):
     i = line_index
     line = input_lines[i]
     barony_match = re.search("b_\w*[-'\w]*", line).regs[0]
-    barony_name = line[barony_match[0] : barony_match[1]][2:]
+    barony_name = line[barony_match[0]: barony_match[1]][2:]
     barony_attributes = dict()
     bracket_level = 0
     while bracket_level >= 0:
@@ -195,7 +197,8 @@ def extract_attribute_value(value: str, input_lines: list, i: int, bracket_level
             value.append(attribute_line)
             i += 1
             attribute_line = input_lines[i]
-            bracket_level += attribute_line.count("{") - attribute_line.count("}")
+            bracket_level += attribute_line.count(
+                "{") - attribute_line.count("}")
         value.append(attribute_line)
         bracket_level -= 1
     return value, i, bracket_level
@@ -249,7 +252,8 @@ def generate_new_county_lines(
                     res.append(val[-remove_tab_nb:])
             else:
                 res.append("\t" * (tab_nb + 1) + key + " =" + value + "\n")
-        res.append("\n" + "\t" * (tab_nb + 1) + "b_" + baronies[i]["name"] + " = {\n")
+        res.append("\n" + "\t" * (tab_nb + 1) + "b_" +
+                   baronies[i]["name"] + " = {\n")
         for key, value in baronies[i]["attributes"].items():
             if type(value) == list:
                 res.append("\t" * (tab_nb + 2) + key + " =" + value[0])
@@ -274,4 +278,5 @@ def get_non_duplicated_county_name(county_name: str, counties: set):
 
 
 if __name__ == "__main__":
-    one_barony_one_county("00_landed_titles.txt", "00_landed_titles_modified.txt")
+    one_barony_one_county("00_landed_titles.txt",
+                          "00_landed_titles_modified.txt")
